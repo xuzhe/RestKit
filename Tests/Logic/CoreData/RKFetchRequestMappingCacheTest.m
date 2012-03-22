@@ -49,9 +49,9 @@
     RKEvent *birthday = [RKEvent createInContext:objectStore.primaryManagedObjectContext];
     birthday.eventID = @"e-1234-a8-b12";
     [objectStore.primaryManagedObjectContext save:nil];
-    
-    NSManagedObject *cachedObject = [cache findInstanceOfEntity:entity 
-                                                    withPrimaryKeyAttribute:mapping
+
+    NSManagedObject *cachedObject = [cache findInstanceOfEntity:entity
+                                                    withPrimaryKeyAttribute:mapping.primaryKeyAttribute
                                              value:@"e-1234-a8-b12"
                                          inManagedObjectContext:objectStore.primaryManagedObjectContext];
     assertThat(cachedObject, is(equalTo(birthday)));
