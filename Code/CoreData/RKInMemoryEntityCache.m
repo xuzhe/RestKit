@@ -21,6 +21,8 @@
 #define RKLogComponent lcl_cRestKitCoreData
 
 @interface RKInMemoryEntityCache ()
+@property(nonatomic, retain) NSMutableArray *attributeCaches;
+
 @property(nonatomic, retain) NSMutableDictionary *entityCache;
 
 - (BOOL)shouldCoerceAttributeToString:(NSString *)attribute forEntity:(NSEntityDescription *)entity;
@@ -29,12 +31,14 @@
 
 @implementation RKInMemoryEntityCache
 
-@synthesize entityCache;
+@synthesize entityCache = _entityCache;
+@synthesize managedObjectContext = _managedObjectContext;
+@synthesize attributeCaches = _attributeCaches;
 
 - (id)init {
     self = [super init];
     if (self) {
-        entityCache = [[NSMutableDictionary alloc] init];
+        _entityCache = [[NSMutableDictionary alloc] init];
 #if TARGET_OS_IPHONE
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(didReceiveMemoryWarning)
@@ -45,9 +49,27 @@
     return self;
 }
 
+- (id)initWithManagedObjectContext:(NSManagedObjectContext *)managedObjectContext
+{
+    self = [self init];
+    if (self) {
+        _managedObjectContext = [managedObjectContext retain];
+    }
+    
+    return self;
+}
+
+- (void)cacheObjectsForEntity:(NSEntityDescription *)entity byAttribute:(NSString *)attributeName
+{
+    
+}
+
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [entityCache release];
+    [_entityCache release];
+    [_managedObjectContext release];
+    [_attributeCaches release];
+    
     [super dealloc];
 }
 
@@ -55,7 +77,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:NSManagedObjectContextObjectsDidChangeNotification
                                                   object:nil];
-    [entityCache removeAllObjects];
+    [_entityCache removeAllObjects];
 }
 
 - (NSMutableDictionary *)cachedObjectsForEntity:(NSEntityDescription *)entity
@@ -65,10 +87,10 @@
     NSAssert(attributeName, @"Cannot retrieve cached objects without an attributeName");
     NSAssert(managedObjectContext, @"Cannot retrieve cached objects without a managedObjectContext");
 
-    NSMutableDictionary *cachedObjectsForEntity = [entityCache objectForKey:entity.name];
+    NSMutableDictionary *cachedObjectsForEntity = [_entityCache objectForKey:entity.name];
     if (cachedObjectsForEntity == nil) {
         [self cacheObjectsForEntity:entity byAttribute:attributeName inContext:managedObjectContext];
-        cachedObjectsForEntity = [entityCache objectForKey:entity.name];
+        cachedObjectsForEntity = [_entityCache objectForKey:entity.name];
     }
     return cachedObjectsForEntity;
 }
@@ -125,7 +147,7 @@
             }
         }
     }
-    [entityCache setObject:dictionary forKey:entity.name];
+    [_entityCache setObject:dictionary forKey:entity.name];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(objectsDidChange:)
@@ -219,7 +241,7 @@
 - (void)expireCacheEntriesForEntity:(NSEntityDescription *)entity {
     NSAssert(entity, @"Cannot expire cache entry for an entity without an entity");
     RKLogTrace(@"About to expire cache for entity name=%@", entity.name);
-    [entityCache removeObjectForKey:entity.name];
+    [_entityCache removeObjectForKey:entity.name];
 }
 
 

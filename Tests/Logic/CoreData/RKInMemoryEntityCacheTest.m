@@ -34,6 +34,13 @@
 
 @implementation RKInMemoryEntityCacheTest
 
+- (void)testInitializationWithManagedObjectContext
+{
+    RKManagedObjectStore *objectStore = [RKTestFactory managedObjectStore];
+    RKInMemoryEntityCache *cache = [[RKInMemoryEntityCache alloc] initWithManagedObjectContext:objectStore.primaryManagedObjectContext];
+    assertThat(cache.managedObjectContext, is(equalTo(objectStore.primaryManagedObjectContext)));
+}
+
 - (void)testShouldCoercePrimaryKeysToStringsForLookup {
     RKManagedObjectStore* objectStore = [RKTestFactory managedObjectStore];
     RKHuman* human = [RKHuman createEntity];
