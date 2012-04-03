@@ -22,14 +22,11 @@
 #import "RKNotifications.h"
 #import "RKLog.h"
 #import "RKParserRegistry.h"
+#import "RKRequestCache.h"
 
 // Set Logging Component
 #undef RKLogComponent
 #define RKLogComponent lcl_cRestKitNetwork
-
-extern NSString* cacheResponseCodeKey;
-extern NSString* cacheMIMETypeKey;
-extern NSString* cacheURLKey;
 
 #define RKResponseIgnoreDelegateIfCancelled(...)                                   \
 if (self.request && [self.request isCancelled]) {                                                  \
@@ -294,22 +291,22 @@ return __VA_ARGS__;                                                             
 }
 
 - (NSURL*)URL {
-    if ([self wasLoadedFromCache]) {
-        return [NSURL URLWithString:[_responseHeaders valueForKey:cacheURLKey]];
+    if ([self wasLoadedFromCache]) {        
+        return [NSURL URLWithString:[_responseHeaders valueForKey:RKRequestCacheURLKey]];
     }
 	return [_httpURLResponse URL];
 }
 
 - (NSString*)MIMEType {
-    if ([self wasLoadedFromCache]) {
-        return [_responseHeaders valueForKey:cacheMIMETypeKey];
+    if ([self wasLoadedFromCache]) {        
+        return [_responseHeaders valueForKey:RKRequestCacheMIMETypeKey];
     }
 	return [_httpURLResponse MIMEType];
 }
 
 - (NSInteger)statusCode {
-    if ([self wasLoadedFromCache]) {
-        return [[_responseHeaders valueForKey:cacheResponseCodeKey] intValue];
+    if ([self wasLoadedFromCache]) {        
+        return [[_responseHeaders valueForKey:RKRequestCacheStatusCodeKey] intValue];
     }
     return ([_httpURLResponse respondsToSelector:@selector(statusCode)] ? [_httpURLResponse statusCode] : 200);
 }
