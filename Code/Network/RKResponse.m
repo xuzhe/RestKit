@@ -434,4 +434,9 @@ extern NSString* cacheURLKey;
 							   options:NSCaseInsensitiveSearch|NSAnchoredSearch].length > 0);
 }
 
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: %p %ld '%@' (%@ bytes)>", 
+            NSStringFromClass([self class]), self, (long) self.statusCode, self.contentType, 
+            self.contentLength];
+}
 @end
