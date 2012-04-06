@@ -41,6 +41,9 @@ namespace :test do
     end
   end
   
+  desc "Run the RestKit integration tests for iOS"
+  task :integration => :kill_simulator
+  
   desc "Run the RestKit unit tests for iOS and OS X"
   task :units => ['units:ios', 'units:osx']
 
